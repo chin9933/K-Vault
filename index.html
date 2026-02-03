@@ -4,6 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Katelya-TGBed | 免费文件托管服务</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="icon" type="image/x-icon" href="/favicon.ico">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/element-ui@2.15.3/lib/theme-chalk/index.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css">
   <style>
@@ -831,32 +833,53 @@
         position: relative;
         top: 0;
       }
+      
+      .main-container {
+        grid-template-columns: 1fr;
+      }
     }
 
-    @media (max-width: 600px) {
+    @media (max-width: 768px) {
       #app {
-        padding: 12px;
+        padding: 16px;
       }
 
       .header {
         flex-direction: column;
-        gap: 16px;
-        padding: 16px 20px;
+        gap: 12px;
+        padding: 14px 18px;
+      }
+
+      .header-title {
+        font-size: 1.25em;
       }
 
       .nav-links {
         width: 100%;
         justify-content: center;
         flex-wrap: wrap;
+        gap: 6px;
       }
 
       .nav-links a {
-        padding: 8px 12px;
+        padding: 8px 14px;
         font-size: 0.85em;
+        gap: 6px;
       }
 
       .card {
         padding: 20px;
+        border-radius: 14px;
+      }
+
+      .card-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+      }
+
+      .card-title {
+        font-size: 1.1em;
       }
 
       .upload-zone {
@@ -865,6 +888,7 @@
 
       .upload-methods {
         flex-direction: column;
+        gap: 10px;
       }
 
       .method-btn {
@@ -879,10 +903,218 @@
       .storage-switcher {
         flex-direction: column;
         align-items: stretch;
+        gap: 10px;
       }
 
       .storage-options {
         justify-content: center;
+      }
+
+      /* 文件列表优化 */
+      .file-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+      }
+
+      .file-info {
+        width: 100%;
+      }
+
+      .file-actions {
+        width: 100%;
+        justify-content: flex-start;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+
+      /* 结果弹窗优化 */
+      .result-dialog .el-dialog {
+        width: 90% !important;
+        margin: 5vh auto !important;
+      }
+    }
+
+    @media (max-width: 480px) {
+      #app {
+        padding: 10px;
+      }
+
+      .header {
+        padding: 12px 14px;
+        gap: 10px;
+        border-radius: 12px;
+        margin-bottom: 16px;
+      }
+
+      .header-title {
+        font-size: 1.1em;
+        gap: 8px;
+      }
+
+      .header-title i {
+        font-size: 1em;
+      }
+
+      .nav-links {
+        gap: 4px;
+      }
+
+      .nav-links a {
+        padding: 6px 10px;
+        font-size: 0.78em;
+        border-radius: 8px;
+        gap: 4px;
+      }
+
+      .nav-links a i {
+        font-size: 0.9em;
+      }
+
+      .card {
+        padding: 16px;
+        border-radius: 12px;
+      }
+
+      .card-header {
+        margin-bottom: 16px;
+      }
+
+      .card-title {
+        font-size: 1em;
+        gap: 8px;
+      }
+
+      .card-title i {
+        font-size: 1em;
+      }
+
+      .upload-zone {
+        padding: 30px 15px;
+        border-radius: 12px;
+      }
+
+      .upload-zone i {
+        font-size: 2.5em !important;
+      }
+
+      .upload-zone p {
+        font-size: 0.9em;
+      }
+
+      .upload-zone span {
+        font-size: 0.8em;
+      }
+
+      .upload-methods {
+        gap: 8px;
+        margin-top: 16px;
+      }
+
+      .method-btn {
+        padding: 10px 16px;
+        font-size: 0.85em;
+        border-radius: 10px;
+      }
+
+      .storage-label {
+        font-size: 0.85em;
+      }
+
+      .storage-options {
+        gap: 6px;
+      }
+
+      .storage-option {
+        padding: 8px 14px;
+        font-size: 0.82em;
+        border-radius: 8px;
+      }
+
+      /* 文件项优化 */
+      .file-item {
+        padding: 12px;
+        border-radius: 10px;
+      }
+
+      .file-preview {
+        width: 50px;
+        height: 50px;
+      }
+
+      .file-name {
+        font-size: 0.88em;
+      }
+
+      .file-size {
+        font-size: 0.75em;
+      }
+
+      .file-actions .el-button {
+        padding: 6px 10px;
+        font-size: 0.78em;
+      }
+
+      /* 进度条优化 */
+      .progress-bar {
+        height: 4px;
+      }
+
+      .progress-info {
+        font-size: 0.78em;
+      }
+
+      /* Element UI 弹窗优化 */
+      .el-message-box {
+        width: 90% !important;
+        max-width: 300px !important;
+      }
+
+      .el-dialog {
+        width: 92% !important;
+        margin: 8vh auto !important;
+      }
+
+      .el-dialog__header {
+        padding: 15px 15px 10px;
+      }
+
+      .el-dialog__body {
+        padding: 15px;
+      }
+
+      .el-dialog__footer {
+        padding: 10px 15px 15px;
+      }
+
+      /* 按钮组优化 */
+      .el-button-group {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+      }
+
+      .el-button-group .el-button {
+        margin-left: 0 !important;
+        flex: 1;
+        min-width: 80px;
+      }
+
+      /* 输入框优化 */
+      .el-input__inner {
+        height: 38px;
+        font-size: 14px;
+      }
+
+      /* 提示信息优化 */
+      .el-message {
+        min-width: auto !important;
+        max-width: 90% !important;
+        padding: 10px 15px !important;
+      }
+
+      .el-message__content {
+        font-size: 13px !important;
       }
     }
   </style>

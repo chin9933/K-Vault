@@ -4,6 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Katelya-TGBed | 管理后台</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="icon" type="image/x-icon" href="/favicon.ico">
   <!-- Import CSS -->
   <link rel="stylesheet" href="./admin-imgtc.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/element-ui@2.15.3/lib/theme-chalk/index.css">
@@ -52,6 +54,14 @@
                 <el-dropdown-item command="video" :class="{ 'el-dropdown-menu__item--selected': fileType === 'video' }"><i :class="fileConfig.video.icon"></i> 视频</el-dropdown-item>
                 <el-dropdown-item command="audio" :class="{ 'el-dropdown-menu__item--selected': fileType === 'audio' }"><i :class="fileConfig.audio.icon"></i> 音频</el-dropdown-item>
                 <el-dropdown-item command="document" :class="{ 'el-dropdown-menu__item--selected': fileType === 'document' }"><i :class="fileConfig.document.icon"></i> 文件</el-dropdown-item>
+              </el-dropdown-menu>
+            </el-dropdown>
+            <el-dropdown @command="switchStorageFilter" :hide-on-click="false">
+              <span class="el-dropdown-link"><i :class="storageFilterIcon"></i></span>
+              <el-dropdown-menu slot="dropdown">
+                <el-dropdown-item command="all" :class="{ 'el-dropdown-menu__item--selected': storageFilter === 'all' }"><i class="fas fa-database"></i> 全部存储</el-dropdown-item>
+                <el-dropdown-item command="telegram" :class="{ 'el-dropdown-menu__item--selected': storageFilter === 'telegram' }"><i class="fab fa-telegram"></i> Telegram</el-dropdown-item>
+                <el-dropdown-item command="r2" :class="{ 'el-dropdown-menu__item--selected': storageFilter === 'r2' }"><i class="fas fa-cloud"></i> R2 存储</el-dropdown-item>
               </el-dropdown-menu>
             </el-dropdown>
             <el-dropdown @command="sort" :hide-on-click="false">
@@ -356,6 +366,7 @@
       sortOption: 'dateDesc',
       filterOption: 'all',
       fileType: 'image',
+      storageFilter: 'all', // all | telegram | r2
       loadMode: 'normal', // normal | dataSaver | noImage
       safeMode: true, // NSFW 安全模式
       systemStatus: {
@@ -399,7 +410,14 @@
             type !== 'document' && this.fileConfig[type].exts.includes(ext) // 匹配其他所有文件
           ) :
           this.fileConfig[this.fileType].exts.includes(ext);
-          return matchesSearch && matchesFilter && matchesType;
+
+          // 存储类型匹配
+          const isR2 = data.name.startsWith('r2:');
+          const matchesStorage = this.storageFilter === 'all' || 
+            (this.storageFilter === 'r2' && isR2) || 
+            (this.storageFilter === 'telegram' && !isR2);
+
+          return matchesSearch && matchesFilter && matchesType && matchesStorage;
         });
       },
       paginatedTableData() {
@@ -425,6 +443,11 @@
         this.fileType === 'video' ? 'fas fa-video' :
         this.fileType === 'audio' ? 'fas fa-music' :
         this.fileType === 'document' ? 'fas fa-folder-open' : '';
+      },
+      storageFilterIcon() {
+        return this.storageFilter === 'all' ? 'fas fa-database' :
+        this.storageFilter === 'telegram' ? 'fab fa-telegram' :
+        this.storageFilter === 'r2' ? 'fas fa-cloud' : 'fas fa-database';
       }
     },
     watch: {  // 监听数据变化
@@ -473,6 +496,7 @@
         handleUpload() { this.$refs.fileInput.click(); },  // 打开文件选择对话框
         sort(command) { this.sortOption = command; },  // 切换排序方式
         filter(command) { this.filterOption = command; },  // 切换筛选方式
+        switchStorageFilter(command) { this.storageFilter = command; this.currentPage = 1; },  // 切换存储类型筛选
         loadMore() {
           const opts = { method: 'GET', credentials: 'include' };
           const url = this.nextCursor
@@ -708,18 +732,33 @@
           });
       },
       handleDelete(index, key) {
-        this.$confirm('此操作将永久删除该文件, 是否继续?', '提示', {
+        const isR2 = key.startsWith('r2:');
+        const storageInfo = isR2 ? 'R2 存储和 KV 记录' : 'KV 记录';
+        this.$confirm(`此操作将永久删除该文件的 ${storageInfo}, 是否继续?`, '提示', {
           confirmButtonText: '确定',
           cancelButtonText: '取消',
           type: 'warning'
         }).then(() => {
-          fetch(`./api/manage/delete/${key}`, { method: 'GET', credentials: 'include' })
-            .then(response => response.ok ? this.tableData.splice(index, 1) : Promise.reject())
-            .then(() => {
-              this.updateStats();
-              this.$message.success('删除成功！');
+          const encodedKey = encodeURIComponent(key);
+          fetch(`./api/manage/delete/${encodedKey}`, { method: 'GET', credentials: 'include' })
+            .then(response => {
+              if (!response.ok) throw new Error('删除失败');
+              return response.json();
             })
-            .catch(() => this.$message.error('删除失败，请检查网络连接'));
+            .then(result => {
+              if (result.success) {
+                // 从本地数据中移除
+                const fileIndex = this.tableData.findIndex(f => f.name === key);
+                if (fileIndex !== -1) {
+                  this.tableData.splice(fileIndex, 1);
+                }
+                this.updateStats();
+                this.$message.success('删除成功！');
+              } else {
+                throw new Error(result.error || '删除失败');
+              }
+            })
+            .catch(err => this.$message.error('删除失败: ' + err.message));
         }).catch(() => this.$message.info('已取消删除'));
       },
       copyToClipboardFallback(text) {
@@ -769,26 +808,53 @@
         this.paginatedTableData.forEach(file => file.selected = selected);
       },
       handleBatchDelete() {  // 批量删除
-        this.$confirm('此操作将永久删除这 ' + this.selectedFiles.length + ' 个文件, 是否继续?', '提示', {
+        const r2Count = this.selectedFiles.filter(f => f.name.startsWith('r2:')).length;
+        const tgCount = this.selectedFiles.length - r2Count;
+        let msg = `此操作将永久删除这 ${this.selectedFiles.length} 个文件`;
+        if (r2Count > 0 && tgCount > 0) {
+          msg += ` (其中 ${r2Count} 个 R2 文件将完全删除, ${tgCount} 个 Telegram 文件仅删除 KV 记录)`;
+        } else if (r2Count > 0) {
+          msg += ` (将从 R2 存储和 KV 中完全删除)`;
+        }
+        msg += ', 是否继续?';
+        
+        this.$confirm(msg, '提示', {
           confirmButtonText: '确定',
           cancelButtonText: '取消',
           type: 'warning'
         }).then(() => {
-          const promises = this.selectedFiles.map(file => fetch(`./api/manage/delete/${file.name}`, { method: 'GET', credentials: 'include' }));
+          const promises = this.selectedFiles.map(file => {
+            const encodedKey = encodeURIComponent(file.name);
+            return fetch(`./api/manage/delete/${encodedKey}`, { method: 'GET', credentials: 'include' })
+              .then(r => r.json())
+              .then(result => ({ name: file.name, success: result.success }))
+              .catch(() => ({ name: file.name, success: false }));
+          });
 
           Promise.all(promises)
             .then(results => {
-              results.forEach((response, index) => {
-                if (response.ok) {
-                  const fileIndex = this.tableData.findIndex(file => file.name === this.selectedFiles[index].name);
+              let successCount = 0;
+              let failedCount = 0;
+              results.forEach(result => {
+                if (result.success) {
+                  const fileIndex = this.tableData.findIndex(file => file.name === result.name);
                   if (fileIndex !== -1) {
                     this.tableData.splice(fileIndex, 1);
+                    successCount++;
                   }
+                } else {
+                  failedCount++;
                 }
               });
               this.selectedFiles = [];
               this.updateStats();
-              this.$message.success('批量删除成功!');
+              if (successCount > 0 && failedCount === 0) {
+                this.$message.success(`成功删除 ${successCount} 个文件!`);
+              } else if (successCount > 0 && failedCount > 0) {
+                this.$message.warning(`删除完成: ${successCount} 成功, ${failedCount} 失败`);
+              } else {
+                this.$message.error('删除失败');
+              }
             })
             .catch(() => this.$message.error('批量删除失败，请检查网络连接'));
         }).catch(() => this.$message.info('已取消批量删除'));

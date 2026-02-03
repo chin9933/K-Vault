@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#8a4bff"/>
+      <stop offset="100%" style="stop-color:#b39ddb"/>
+    </linearGradient>
+    <linearGradient id="cloudGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#ffffff"/>
+      <stop offset="100%" style="stop-color:#f0e6ff"/>
+    </linearGradient>
+  </defs>
+  <!-- Background circle -->
+  <circle cx="32" cy="32" r="30" fill="url(#bgGrad)"/>
+  <!-- Cloud shape -->
+  <path d="M46 36c0-5.5-4.5-10-10-10-.5-5-4.8-9-10-9-5.5 0-10 4.5-10 10 0 .3 0 .7.1 1C12.5 29 10 32 10 36c0 4.4 3.6 8 8 8h28c4.4 0 8-3.6 8-8z" fill="url(#cloudGrad)" opacity="0.95"/>
+  <!-- Upload arrow -->
+  <path d="M32 24v16M26 30l6-6 6 6" stroke="#8a4bff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+</svg>

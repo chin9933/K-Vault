@@ -602,7 +602,108 @@ body {
     height: 32px;
     margin-right: 8px;
   }
+  .title {
+    font-size: 1em;
+    margin-right: 0;
+  }
+  .header-content .actions {
+    flex-wrap: wrap;
+    gap: 4px;
+    justify-content: flex-end;
+  }
+  .el-dropdown-link {
+    padding: 4px;
+  }
 }
+
+@media (max-width: 480px) {
+  .header-content {
+    flex-wrap: wrap;
+    height: auto;
+    padding: 8px 10px;
+    gap: 8px;
+  }
+  .title {
+    font-size: 0.9em;
+    order: 1;
+  }
+  .home-btn {
+    order: 0;
+    width: 28px;
+    height: 28px;
+  }
+  .stats {
+    order: 2;
+    font-size: 0.8em;
+    padding: 4px 8px;
+  }
+  .header-content .actions {
+    order: 3;
+    width: 100%;
+    justify-content: center;
+    gap: 2px;
+    padding-top: 6px;
+    border-top: 1px solid rgba(0,0,0,0.05);
+    margin-top: 4px;
+  }
+  .header-content .actions i {
+    font-size: 0.95em;
+    margin: 0 2px;
+    padding: 4px;
+  }
+  .main-container {
+    margin-top: 100px;
+    padding: 8px;
+  }
+  .content {
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+  .image-card {
+    border-radius: 12px;
+  }
+  .card-footer {
+    font-size: 0.75em;
+    padding: 6px 8px;
+  }
+  .overlay-buttons {
+    flex-direction: column;
+    gap: 6px;
+  }
+  .overlay-buttons .el-button {
+    padding: 4px 10px;
+    font-size: 12px;
+  }
+  .control-btn {
+    width: 32px;
+    height: 32px;
+  }
+  .video-controls, .audio-controls, .file-controls {
+    gap: 6px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .pagination-container {
+    padding: 0 8px;
+  }
+  .el-pagination {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .batch-toolbar {
+    max-width: 95%;
+    padding: 4px 10px;
+  }
+  .batch-toolbar .el-button {
+    padding: 6px 10px;
+    font-size: 12px;
+  }
+  .batch-count {
+    font-size: 11px;
+  }
+}
+
 .website-edit-dialog .el-textarea__inner{
   height: 240px !important;
 }
