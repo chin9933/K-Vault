@@ -9,6 +9,7 @@ Use tg channel/chat for storage
 How to use?
 
 First, you need to create a new telegram bot to obtain the token and a telegram channel to obtain Chat_ID
+
 ## How to Obtain `Bot_Token` and `Chat_ID` for Telegram
 
 If you don't have a Telegram account yet, please create one first. Then, follow these steps to get the `Bot_Token` and `Chat_ID`:
@@ -21,7 +22,7 @@ If you don't have a Telegram account yet, please create one first. Then, follow 
 
 3. **Get the `Chat_ID`**
    - Use [@GetTheirIDBot](https://t.me/GetTheirIDBot) to get your channel ID. Send a message to this bot and follow the instructions to receive your `Chat_ID` (the ID of your channel).
-   
+
 ## Deployment
 
 ### Preparation
@@ -32,9 +33,9 @@ The only thing you need to prepare in advance is a Cloudflare account
 
 3 simple steps to deploy this project and have your own image hosting
 
-1.Fork this repository (Note: In order to make this work. You have to using Git or Wrangler CLI to deploy this project. [Document](https://developers.cloudflare.com/pages/functions/get-started/#deploy-your-function))
+1. Fork this repository (Note: In order to make this work. You have to using Git or Wrangler CLI to deploy this project. [Document](https://developers.cloudflare.com/pages/functions/get-started/#deploy-your-function))
 
-2.Open the Cloudflare Dashboard, enter the Pages management page, choose to create a project, then choose `Connecting to the Git Provider`
+2. Open the Cloudflare Dashboard, enter the Pages management page, choose to create a project, then choose `Connecting to the Git Provider`
 
 3. Follow the prompts on the page to enter the project name, select the git repository you need to connect to, then click `Deploy`
 
@@ -54,7 +55,7 @@ Inside the custom domain of pages, bind the domain name that exists in your Clou
 
 ### Setup image review API
 
-1. Please go to https://moderatecontent.com/ to register and get a free API key for reviewing image content
+1. Please go to [https://moderatecontent.com/](https://moderatecontent.com/) to register and get a free API key for reviewing image content
 
 2. Open the settings of Cloudflare Pages, click `Settings`, `Environment Variables`, `Add Environment Variables` in turn
 
