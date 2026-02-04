@@ -911,8 +911,11 @@
         },
         officeViewerUrl() {
           // 使用 Microsoft Office Online Viewer
-          const fullUrl = encodeURIComponent(window.location.origin + this.fileUrl);
-          return `https://view.officeapps.live.com/op/embed.aspx?src=${fullUrl}`;
+          // 确保生成完整的绝对 URL（必须是公网可访问的链接）
+          const fileUrlPath = this.fileUrl.startsWith('/') ? this.fileUrl : `/file/${this.fileUrl}`;
+          const fullUrl = window.location.origin + fileUrlPath;
+          // URL 必须经过正确编码
+          return `https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(fullUrl)}`;
         }
       },
       methods: {
@@ -1055,16 +1058,19 @@
               'mp4': 'video/mp4',
               'webm': 'video/webm',
               'ogg': 'video/ogg',
-              'mov': 'video/mp4',
+              'mov': 'video/quicktime',
               'avi': 'video/x-msvideo',
               'mkv': 'video/x-matroska',
-              'm4v': 'video/mp4'
+              'm4v': 'video/x-m4v'
             };
             const mimeType = mimeTypes[ext] || 'video/mp4';
 
+            // 确保使用本站代理链接（相对路径自动指向本站）
+            const videoUrl = this.fileUrl.startsWith('/') ? this.fileUrl : `/file/${this.fileUrl}`;
+
             this.artplayer = new Artplayer({
               container: container,
-              url: this.fileUrl,
+              url: videoUrl,
               type: mimeType,
               volume: 0.7,
               isLive: false,
@@ -1090,20 +1096,40 @@
               airplay: true,
               theme: '#8a4bff',
               lang: navigator.language.toLowerCase().includes('zh') ? 'zh-cn' : 'en',
+              // 关键：允许跨域请求和 Range 请求
               moreVideoAttr: {
-                crossOrigin: 'anonymous'
+                crossOrigin: 'anonymous',
+                preload: 'metadata'
+              },
+              // 自定义请求处理，确保使用正确的 headers
+              customType: {
+                [mimeType]: function (video, url) {
+                  video.src = url;
+                }
               }
             });
 
             // 监听错误事件
             this.artplayer.on('error', (error) => {
               console.error('Artplayer error:', error);
-              this.videoError = true;
+              // 不立即显示错误，给播放器重试机会
+              setTimeout(() => {
+                if (this.artplayer && !this.artplayer.playing) {
+                  this.videoError = true;
+                }
+              }, 3000);
             });
 
             // 监听准备就绪
             this.artplayer.on('ready', () => {
               console.log('Artplayer ready');
+              this.videoError = false;
+            });
+
+            // 监听视频加载
+            this.artplayer.on('video:loadedmetadata', () => {
+              console.log('Video metadata loaded');
+              this.videoError = false;
             });
 
           } catch (e) {
@@ -1122,17 +1148,20 @@
           }
 
           try {
+            // 确保使用本站代理链接
+            const audioUrl = this.fileUrl.startsWith('/') ? this.fileUrl : `/file/${this.fileUrl}`;
+
             this.aplayer = new APlayer({
               container: container,
               audio: [{
                 name: this.fileName,
                 artist: '未知艺术家',
-                url: this.fileUrl,
+                url: audioUrl,
                 cover: ''
               }],
               theme: '#8a4bff',
               loop: 'none',
-              preload: 'auto',
+              preload: 'metadata',  // 使用 metadata 预加载，支持 Range 请求
               volume: 0.7,
               mutex: true,
               listFolded: true
@@ -1154,6 +1183,12 @@
             this.aplayer.on('error', () => {
               console.error('APlayer error');
               this.audioError = true;
+            });
+
+            // 监听加载成功
+            this.aplayer.on('loadedmetadata', () => {
+              console.log('Audio metadata loaded');
+              this.audioError = false;
             });
 
           } catch (e) {
