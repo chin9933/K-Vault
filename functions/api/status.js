@@ -5,7 +5,7 @@
  */
 import { createS3Client } from '../utils/s3client.js';
 import { checkDiscordConnection } from '../utils/discord.js';
-import { checkHuggingFaceConnection } from '../utils/huggingface.js';
+import { checkHuggingFaceConnection, hasHuggingFaceConfig } from '../utils/huggingface.js';
 import { getGuestConfig } from '../utils/guest.js';
 
 export async function onRequestGet(context) {
@@ -115,7 +115,7 @@ export async function onRequestGet(context) {
   }
 
   // 检查 HuggingFace 配置
-  if (env.HF_TOKEN && env.HF_REPO) {
+  if (hasHuggingFaceConfig(env)) {
     checks.push(
       checkHuggingFaceConnection(env)
         .then(result => {
@@ -124,7 +124,7 @@ export async function onRequestGet(context) {
             enabled: result.connected,
             message: result.connected
               ? `已连接 - ${result.repoId}${result.isPrivate ? ' (私有)' : ''}`
-              : '连接失败'
+              : (result.error || '连接失败')
           };
         })
         .catch(e => { status.huggingface = { connected: false, enabled: false, message: `连接错误: ${e.message}` }; })

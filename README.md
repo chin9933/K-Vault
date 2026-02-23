@@ -182,7 +182,7 @@
 
 1. 前往 [Discord Developer Portal](https://discord.com/developers/applications) 创建应用
 2. 在 Bot 标签页创建 Bot，获取 Token
-3. 在 OAuth2 → URL Generator 中，选择 `bot` scope 和 `Send Messages`、`Attach Files`、`Read Message History` 权限
+3. 在 OAuth2 → URL Generator 中，选择 `bot` scope，并给 Bot 授予 `Administrator` 权限
 4. 使用生成的 URL 邀请 Bot 到你的服务器
 5. 在 Cloudflare Pages 添加 `DISCORD_BOT_TOKEN` 和 `DISCORD_CHANNEL_ID`
 6. 重新部署
@@ -190,7 +190,7 @@
 **故障排查（`File not found on Discord`）：**
 
 1. 确认 `DISCORD_WEBHOOK_URL` 指向的频道，Bot 也能访问（频道不一致会导致上传成功但直链失败）。
-2. Bot 至少需要 `View Channel` + `Read Message History` 权限；若使用 Bot 上传，还需要 `Send Messages` + `Attach Files`。
+2. 直接给 Bot 授予 `Administrator` 权限，避免频道权限遗漏导致读取失败。
 3. 修改环境变量后必须重新部署 Cloudflare Pages（仅保存变量不会即时生效）。
 4. 打开 `/api/status` 检查 Discord 状态是否显示为 `bot`、`webhook` 或 `bot+webhook`。
 

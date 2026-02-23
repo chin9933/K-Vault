@@ -5,7 +5,7 @@
 import { checkAuthentication, isAuthRequired } from '../../utils/auth.js';
 import { createS3Client } from '../../utils/s3client.js';
 import { uploadToDiscord } from '../../utils/discord.js';
-import { uploadToHuggingFace } from '../../utils/huggingface.js';
+import { hasHuggingFaceConfig, uploadToHuggingFace } from '../../utils/huggingface.js';
 
 export async function onRequestPost(context) {
   const { request, env } = context;
@@ -124,7 +124,7 @@ export async function onRequestPost(context) {
       extraMetadata.discordUploadMode = discordResult.mode;
       extraMetadata.discordSourceUrl = discordResult.sourceUrl;
     } else if (storageType === 'huggingface') {
-      if (!env.HF_TOKEN || !env.HF_REPO) {
+      if (!hasHuggingFaceConfig(env)) {
         return new Response(JSON.stringify({ error: 'HuggingFace 未配置，无法完成上传' }), {
           status: 500, headers: { 'Content-Type': 'application/json' }
         });

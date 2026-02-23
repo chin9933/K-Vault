@@ -2304,7 +2304,10 @@
             const data = await response.json();
 
             if (!response.ok || (Array.isArray(data) && data[0]?.error)) {
-              throw new Error(data[0]?.error || "上传失败");
+              const serverError = Array.isArray(data)
+                ? data[0]?.error
+                : data?.error;
+              throw new Error(serverError || "上传失败");
             }
 
             const src = data[0]?.src;

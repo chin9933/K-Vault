@@ -3,7 +3,7 @@ import { checkAuthentication, isAuthRequired } from "./utils/auth.js";
 import { checkGuestUpload, incrementGuestCount } from "./utils/guest.js";
 import { createS3Client } from "./utils/s3client.js";
 import { uploadToDiscord } from "./utils/discord.js";
-import { uploadToHuggingFace } from "./utils/huggingface.js";
+import { hasHuggingFaceConfig, uploadToHuggingFace } from "./utils/huggingface.js";
 
 export async function onRequestPost(context) {
     const { request, env } = context;
@@ -57,7 +57,7 @@ export async function onRequestPost(context) {
             }
             result = await uploadToDiscordStorage(uploadFile, fileName, fileExtension, env);
         } else if (storageMode === 'huggingface') {
-            if (!env.HF_TOKEN || !env.HF_REPO) {
+            if (!hasHuggingFaceConfig(env)) {
                 return errorResponse('HuggingFace 未配置，无法上传');
             }
             result = await uploadToHFStorage(uploadFile, fileName, fileExtension, env);
