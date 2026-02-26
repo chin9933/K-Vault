@@ -1,5 +1,7 @@
-node_modules/.bin/*
-node_modules/.mf/*
+node_modules/
 .wrangler/*
 data/*
 tmpclaude*
+cloudreve-adapter/node_modules/
+cloudreve-adapter/data/
+cloudreve-adapter/*.db
