@@ -286,6 +286,46 @@ curl -X POST "http://127.0.0.1:8081/bot<YOUR_BOT_TOKEN>/setWebhook" \
 
 ---
 
+## Cloudreve 适配器（可选）
+
+如果你希望以 **Cloudreve** 作为前端文件管理系统，同时将 **Telegram 频道**作为永久对象存储后端，可以使用项目内置的中间件服务：[`cloudreve-adapter`](cloudreve-adapter/README.md)。
+
+### 架构概览
+
+```
+用户（通过 Cloudreve 操作）
+  ▼
+Cloudreve ──── webhook/轮询 ────▶ K-Vault Adapter ──▶ Telegram 频道（永久存储）
+  ▲                                     │
+  └────── 缓存恢复（文件不存在时）◀────────┘
+```
+
+| 层 | 角色 |
+| :--- | :--- |
+| Cloudreve | 唯一用户入口（上传 / 下载 / 分享） |
+| Adapter | 中间层（同步、下载代理、缓存管理） |
+| Telegram | 永久对象存储（永不删除） |
+
+### 核心功能
+
+- **上传同步**：轮询 Cloudreve 目录，检测新文件后自动上传至 Telegram
+- **群组文件入库**：Telegram Bot 接收群组文件，自动同步到 Cloudreve 并回复直链
+- **下载代理**：透明代理，缓存命中直接返回，缓存淘汰时从 Telegram 自动恢复
+- **缓存淘汰**：定时清理长期未访问的 Cloudreve 本地副本，节省本地存储
+
+### 快速启动
+
+```bash
+cd cloudreve-adapter
+cp .env.example .env
+# 编辑 .env，填写 TG_BOT_TOKEN、TG_CHANNEL_ID、CLOUDREVE_URL 等必填项
+docker compose up -d
+```
+
+详细配置请参阅 [`cloudreve-adapter/README.md`](cloudreve-adapter/README.md)。
+
+---
+
 ## 访客上传功能
 
 允许未登录用户上传文件，站长可自行配置是否开启及限制规则。

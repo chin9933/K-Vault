@@ -286,6 +286,46 @@ Use HuggingFace Datasets API to store files. Files are saved to a Dataset reposi
 
 ---
 
+## Cloudreve Adapter (Optional)
+
+If you want to use **Cloudreve** as the front-end file management system while using a **Telegram channel** as the permanent object storage backend, you can use the built-in middleware service: [`cloudreve-adapter`](cloudreve-adapter/README.md).
+
+### Architecture Overview
+
+```
+User (all operations via Cloudreve)
+  ▼
+Cloudreve ──── webhook/polling ────▶ K-Vault Adapter ──▶ Telegram Channel (permanent storage)
+  ▲                                        │
+  └────── Cache restore (on cache miss) ◀──┘
+```
+
+| Layer | Role |
+| :--- | :--- |
+| Cloudreve | Single user entry point (upload / download / share) |
+| Adapter | Middleware layer (sync, download proxy, cache management) |
+| Telegram | Permanent object storage (never deleted) |
+
+### Core Features
+
+- **Upload Sync**: Polls Cloudreve directories and automatically uploads new files to Telegram
+- **Group File Ingestion**: Telegram Bot receives files from groups and syncs them to Cloudreve, replying with direct links
+- **Download Proxy**: Transparent proxy — cache hit returns directly; on cache miss, restores from Telegram automatically
+- **Cache Eviction**: Periodically removes long-idle Cloudreve local copies to save local storage
+
+### Quick Start
+
+```bash
+cd cloudreve-adapter
+cp .env.example .env
+# Edit .env and fill in TG_BOT_TOKEN, TG_CHANNEL_ID, CLOUDREVE_URL, etc.
+docker compose up -d
+```
+
+For detailed configuration, see [`cloudreve-adapter/README.md`](cloudreve-adapter/README.md).
+
+---
+
 ## Guest Upload Feature
 
 Allows non-logged-in users to upload files. Site owners can configure whether it is enabled and apply restriction rules.
