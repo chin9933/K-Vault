@@ -1,0 +1,32 @@
+version: "3.9"
+
+# ── K-Vault Telegram Adapter ──────────────────────────────────────────────────
+#
+# This compose file deploys ONLY the adapter service.
+# It assumes you have already self-deployed Cloudreve V4 separately.
+#
+# Prerequisites:
+#   1. Copy .env.example to .env and fill in your values.
+#   2. Set CLOUDREVE_URL in .env to the address of your running Cloudreve V4 instance.
+#
+# Start the adapter:
+#   docker compose up -d
+
+services:
+
+  # ── K-Vault Telegram Adapter (middleware) ─────────────────────────────────
+  adapter:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: kvault-adapter
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    volumes:
+      - adapter-data:/app/data
+    env_file:
+      - .env
+
+volumes:
+  adapter-data:

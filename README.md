@@ -2,37 +2,49 @@
 
 # K-Vault
 
-> 以 Cloudreve 为前端、Telegram 频道为永久存储后端的文件托管解决方案
+> Cloudreve + Telegram 双存储系统适配器
 
 [English](README-EN.md) | **中文**
 
 <br>
 
-![GitHub stars](https://img.shields.io/github/stars/katelya77/K-Vault?style=flat-square)
-![GitHub forks](https://img.shields.io/github/forks/katelya77/K-Vault?style=flat-square)
-![GitHub license](https://img.shields.io/github/license/katelya77/K-Vault?style=flat-square)
+![GitHub stars](https://img.shields.io/github/stars/chin9933/K-Vault?style=flat-square)
+![GitHub forks](https://img.shields.io/github/forks/chin9933/K-Vault?style=flat-square)
+![GitHub license](https://img.shields.io/github/license/chin9933/K-Vault?style=flat-square)
 
 </div>
 
 ---
 
+## 项目简介
+
+K-Vault 是一个 **Cloudreve + Telegram 双存储系统适配器**（中间件服务）。
+
+- **Cloudreve V4**：唯一的用户入口，负责上传、下载和文件分享（需自行独立部署）
+- **K-Vault Adapter**：本仓库，负责将文件永久同步至 Telegram 频道，并管理 Cloudreve 本地缓存
+- **Telegram 频道**：永久存储层，文件一旦同步即永不删除
+
+> ⚠️ 本项目仅支持 **Cloudreve V4 API**，不兼容 V3。
+
+---
+
 ## 架构概览
 
-所有上传/下载操作均通过 **Cloudreve** 的界面和 API 完成，底层由 **K-Vault Adapter** 负责将文件永久同步到 **Telegram 频道**。
-
 ```
-用户（通过 Cloudreve 操作）
+用户（所有操作通过 Cloudreve）
   ▼
-Cloudreve ──── webhook/轮询 ────▶ K-Vault Adapter ──▶ Telegram 频道（永久存储）
-  ▲                                     │
-  └────── 缓存恢复（文件不存在时）◀────────┘
+Cloudreve V4 ──── webhook/轮询 ────▶ K-Vault Adapter ──▶ Telegram 频道（永久存储）
+  ▲                                        │
+  └────── 缓存恢复（本地副本不存在时）◀─────┘
 ```
 
 | 层 | 角色 |
 | :--- | :--- |
-| Cloudreve | 唯一用户入口（上传 / 下载 / 分享） |
-| Adapter | 中间层（同步、下载代理、缓存管理） |
-| Telegram | 永久对象存储（永不删除） |
+| Cloudreve V4 | 唯一用户入口（上传 / 下载 / 分享） |
+| K-Vault Adapter | 中间层（同步、下载代理、缓存管理） |
+| Telegram 频道 | 永久对象存储（永不删除） |
+
+---
 
 ## 功能特性
 
@@ -45,14 +57,39 @@ Cloudreve ──── webhook/轮询 ────▶ K-Vault Adapter ──▶ 
 
 ## 快速部署
 
+> 前置要求：已自行部署并运行 **Cloudreve V4** 实例，以及 Docker & Docker Compose。
+
 ```bash
-cd cloudreve-adapter
+# 1. 复制并填写配置
 cp .env.example .env
 # 编辑 .env，填写 TG_BOT_TOKEN、TG_CHANNEL_ID、CLOUDREVE_URL 等必填项
+
+# 2. 启动 Adapter
 docker compose up -d
 ```
 
-详细配置请参阅 [`cloudreve-adapter/README.md`](cloudreve-adapter/README.md)。
+Adapter API 默认地址：`http://localhost:3000`
+
+---
+
+## 环境变量
+
+| 变量名 | 必需 | 默认值 | 说明 |
+|--------|:----:|--------|------|
+| `TG_BOT_TOKEN` | ✅ | — | Telegram Bot Token |
+| `TG_CHANNEL_ID` | ✅ | — | Telegram 存储频道 ID（负数） |
+| `CLOUDREVE_URL` | ✅ | — | Cloudreve V4 地址（如 `http://cloudreve:5212`） |
+| `CLOUDREVE_USER` | ✅ | — | Cloudreve 管理员用户名 |
+| `CLOUDREVE_PASSWORD` | ✅ | — | Cloudreve 管理员密码 |
+| `PORT` | — | `3000` | Adapter 监听端口 |
+| `DB_PATH` | — | `./data/mappings.db` | SQLite 数据库路径 |
+| `CLOUDREVE_INBOX_PATH` | — | `/TelegramInbox` | Bot 入库目录 |
+| `CACHE_IDLE_DAYS` | — | `7` | 缓存淘汰天数 |
+| `POLL_INTERVAL_MINUTES` | — | `5` | Cloudreve 轮询间隔（分钟） |
+| `WEBHOOK_SECRET` | — | — | 保护管理 API 的 Token（`X-Webhook-Secret` 请求头） |
+| `TG_WEBHOOK_SECRET` | — | — | Telegram Webhook Secret Token |
+| `TG_API_BASE` | — | `https://api.telegram.org` | 自定义 Bot API 服务器地址 |
+| `SKIP_INITIAL_SYNC` | — | `false` | 启动时跳过初始同步 |
 
 ---
 
@@ -60,7 +97,7 @@ docker compose up -d
 
 - [Cloudreve 官网](https://cloudreve.org)
 - [Telegram Bot API](https://core.telegram.org/bots/api)
-- [问题反馈](https://github.com/katelya77/K-Vault/issues)
+- [问题反馈](https://github.com/chin9933/K-Vault/issues)
 
 ---
 
@@ -72,4 +109,4 @@ MIT License
 
 ## Star History
 
-[![Star History Chart](https://api.star-history.com/svg?repos=katelya77/K-Vault&type=Date)](https://star-history.com/#katelya77/K-Vault&Date)
+[![Star History Chart](https://api.star-history.com/svg?repos=chin9933/K-Vault&type=Date)](https://star-history.com/#chin9933/K-Vault&Date)

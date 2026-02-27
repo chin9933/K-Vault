@@ -1,11 +1,12 @@
 'use strict';
 
 /**
- * Cloudreve v3 API client.
+ * Cloudreve v4 API client.
  *
  * Handles authentication (cookie-based session), file listing,
  * uploading, downloading and deletion via the REST API.
  *
+ * Requires Cloudreve V4 (the V3 API is no longer supported or compatible).
  * Ref: https://cloudreve.org/docs/
  */
 
@@ -39,7 +40,7 @@ class CloudreveClient {
     const now = Date.now();
     if (this._cookie && now < this._cookieExpiry) return;
 
-    const res = await this._rawFetch('/api/v3/user/session', {
+    const res = await this._rawFetch('/api/v4/user/session', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ userName: this.user, Password: this.password }),
@@ -95,7 +96,7 @@ class CloudreveClient {
    */
   async listDirectory(dirPath = '/') {
     const encoded = encodeURIComponent(dirPath);
-    return this._authJson(`/api/v3/directory${encoded}`);
+    return this._authJson(`/api/v4/directory${encoded}`);
   }
 
   /**
@@ -103,7 +104,7 @@ class CloudreveClient {
    * @param {string} dirPath
    */
   async createDirectory(dirPath) {
-    return this._authJson('/api/v3/directory', {
+    return this._authJson('/api/v4/directory', {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ path: dirPath }),
@@ -128,7 +129,7 @@ class CloudreveClient {
    * @returns {Promise<string>} Signed download URL
    */
   async getDownloadUrl(fileId) {
-    const data = await this._authJson(`/api/v3/file/download/${fileId}`, {
+    const data = await this._authJson(`/api/v4/file/download/${fileId}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ speed: 0 }),
@@ -162,7 +163,7 @@ class CloudreveClient {
    */
   async uploadFile({ filePath, fileName, fileSize, mimeType, data }) {
     // Step 1: initialise upload session
-    const initData = await this._authJson('/api/v3/file/upload', {
+    const initData = await this._authJson('/api/v4/file/upload', {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -179,7 +180,7 @@ class CloudreveClient {
     if (!sessionId) throw new Error('Cloudreve did not return a session ID for upload');
 
     // Step 2: upload chunk(s) – single chunk for simplicity
-    const chunkRes = await this._authFetch(`/api/v3/file/upload/${sessionId}/0`, {
+    const chunkRes = await this._authFetch(`/api/v4/file/upload/${sessionId}/0`, {
       method: 'POST',
       headers: {
         'Content-Type':   mimeType || 'application/octet-stream',
@@ -206,7 +207,7 @@ class CloudreveClient {
    * @param {string} filePath – full Cloudreve path, e.g. "/TelegramInbox/file.pdf"
    */
   async deleteFile(filePath) {
-    await this._authJson('/api/v3/object', {
+    await this._authJson('/api/v4/object', {
       method: 'DELETE',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ items: [], dirs: [], files: [filePath] }),
@@ -220,7 +221,7 @@ class CloudreveClient {
    */
   async searchFiles(keyword) {
     const encoded = encodeURIComponent(keyword);
-    const data = await this._authJson(`/api/v3/file/search/keyword/${encoded}`);
+    const data = await this._authJson(`/api/v4/file/search/keyword/${encoded}`);
     return data?.objects ?? [];
   }
 

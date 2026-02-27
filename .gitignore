@@ -2,6 +2,3 @@ node_modules/
 .wrangler/*
 data/*
 tmpclaude*
-cloudreve-adapter/node_modules/
-cloudreve-adapter/data/
-cloudreve-adapter/*.db
